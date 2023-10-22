@@ -11,7 +11,9 @@ info(logger, "LOGGER CREATED")
 
 # cdm snapshot ----
 info(logger, "CDM SNAPSHOT")
-write_csv(snapshot(cdm), here(resultsFolder, paste0(cdmName(cdm), "_snapshot.csv")))
+snapshot(cdm) %>%
+  mutate(result_type = "CDM snapshot") %>%
+  write_csv(here(resultsFolder, paste0(cdmName(cdm), "_snapshot.csv")))
 info(logger, "CDM SNAPSHOT DONE")
 
 # instantiate cohorts ----
@@ -58,7 +60,8 @@ inc <- estimateIncidence(
   outcomeTable = "outcome_cohort",
   interval = "overall",
   minCellCount = minCellCount
-)
+) %>%
+  muatte(result_type = "Incidence estimates")
 write_csv(
   x = inc, file = here(resultsFolder, paste0(cdmName(cdm), "_incidence.csv"))
 )
@@ -66,13 +69,18 @@ info(logger, "INCIDENCE SAVED")
 
 # export cohort counts ----
 exportCohort <- function(cohort) {
-  cohortSet(cohort) %>%
-    inner_join(cohortAttrition(cohort)) %>%
+  tblName <- attr(cohort, "tbl_name")
+  if (is.null(tblName)) {
+    tblName <- "denominator"
+  }
+  x <- cohortSet(cohort) %>%
+    inner_join(cohortAttrition(cohort), by = "cohort_definition_id") %>%
     mutate(
       cdm_name = cdmName(attr(cohort, "cdm_reference")),
       result_type = "Cohort details",
-      cohort_table_name = attr(cohort, "tbl_name")
+      cohort_table_name = tblName
     )
+  return(x)
 }
 write_csv(
   x = exportCohort(cdm$target_cohort),

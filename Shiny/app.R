@@ -23,15 +23,17 @@ incidenceEstimates <- NULL
 cohortDetails <- NULL
 for (file in files) {
   name <- basename(file)
-  x <- read_csv(file)
+  x <- read_csv(file, show_col_types = FALSE)
   if (grepl("snapshot", file)) {
     cdmSnapshot <- union_all(cdmSnapshot, x)
   } else if (grepl("incidence", file)) {
     incidenceEstimates <- union_all(incidenceEstimates, x)
-  } else if (grepl("count", file)) {
-    cohortDetails <- union_all(cohortDetails, x)
+  } else if (grepl("counts", file)) {
+    cohortDetails <- bind_rows(cohortDetails, x)
   }
 }
+cdmSnapshot <- cdmSnapshot %>% mutate(result_type = "CDM snapshot")
+incidenceEstimates <- incidenceEstimates %>% mutate(result_type = "Incidence estimates")
 
 # ui shiny ----
 ui <- dashboardPage(
