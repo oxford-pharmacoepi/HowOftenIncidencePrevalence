@@ -11,7 +11,7 @@ info(logger, "LOGGER CREATED")
 
 # cdm snapshot ----
 info(logger, "CDM SNAPSHOT")
-write_csv(snapshot(cdm), here(resultsFolder, "cdmSnapshot.csv"))
+write_csv(snapshot(cdm), here(resultsFolder, paste0(cdmName(cdm), "_snapshot.csv")))
 info(logger, "CDM SNAPSHOT DONE")
 
 # instantiate cohorts ----
@@ -43,8 +43,8 @@ cdm <- generateDenominatorCohortSet(
   cohortDateRange = as.Date(c("2002-01-01", "2022-12-31")),
   sex = c("Both", "Male", "Female"),
   ageGroup = list(
-    c(0, Inf), c(0, 2), c(3, 12), c(13, 17), c(18, 29), c(30, 39), c(40, 49),
-    c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, Inf)
+    c(0, 150), c(0, 2), c(3, 12), c(13, 17), c(18, 29), c(30, 39), c(40, 49),
+    c(50, 59), c(60, 69), c(70, 79), c(80, 89), c(90, 150)
   ),
   targetCohortTable = "target_cohort"
 )
