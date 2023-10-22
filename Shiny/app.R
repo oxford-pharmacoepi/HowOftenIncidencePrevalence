@@ -499,7 +499,7 @@ server <- function(input, output, session) {
     incidenceEstimates %>%
       filter(cdm_name %in% input$incidence_estimates_cdm_name) %>%
       filter(outcome_cohort_name %in% input$incidence_estimates_outcome_cohort_name) %>%
-      filter(denominator_target_cohort_name %in% input$incidence_estimates_denominator_target_cohort_name) %>%
+      #filter(denominator_target_cohort_name %in% input$incidence_estimates_denominator_target_cohort_name) %>%
       filter(denominator_age_group %in% input$incidence_estimates_denominator_age_group) %>%
       filter(denominator_sex %in% input$incidence_estimates_denominator_sex) %>%
       # filter(denominator_days_prior_observation %in% input$incidence_estimates_denominator_days_prior_observation) %>%
