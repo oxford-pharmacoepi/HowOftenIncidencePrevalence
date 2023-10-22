@@ -10,14 +10,28 @@ library("here")
 library("DT")
 library("CDMUtilities")
 library("shinyWidgets")
+library("tidyr")
 library("plotly")
 library("shinycssloaders")
 library("IncidencePrevalence")
 library("ggplot2")
 
 # read results from data folder ----
-cdmSnapshot <- read_csv(here("data", "CDM snapshot.csv"), col_types = cols(.default = "c"))
-incidenceEstimates <- read_csv(here("data", "Incidence estimates.csv"), col_types = cols(.default = "c"))
+files <- list.files(here("data"), full.names = TRUE)
+cdmSnapshot <- NULL
+incidenceEstimates <- NULL
+cohortDetails <- NULL
+for (file in files) {
+  name <- basename(file)
+  x <- read_csv(file)
+  if (grepl("snapshot", file)) {
+    cdmSnapshot <- union_all(cdmSnapshot, x)
+  } else if (grepl("incidence", file)) {
+    incidenceEstimates <- union_all(incidenceEstimates, x)
+  } else if (grepl("count", file)) {
+    cohortDetails <- union_all(cohortDetails, x)
+  }
+}
 
 # ui shiny ----
 ui <- dashboardPage(
@@ -35,6 +49,18 @@ ui <- dashboardPage(
         menuSubItem(
           text = "CDM snapshot",
           tabName = "cdm_snapshot"
+        )
+      ),
+      menuItem(
+        text = "Cohort details",
+        tabName = "cohort_details",
+        menuSubItem(
+          text = "Cohort count",
+          tabName = "cohort_count"
+        ),
+        menuSubItem(
+          text = "Cohort attrition",
+          tabName = "cohort_attrition"
         )
       ),
       menuItem(
@@ -65,6 +91,88 @@ ui <- dashboardPage(
         h3("Database details"),
         p("See details of CDM snapshot for each database:"),
         DTOutput("cdm_snapshot_table")
+      ),
+      ### cohort_count ----
+      tabItem(
+        tabName = "cohort_count",
+        h3("Cohort counts"),
+        p("Cohort counts for each cohort of the present study"),
+        div(
+          style = "display: inline-block;vertical-align:top; width: 150px;",
+          pickerInput(
+            inputId = "cohort_count_cohort_table_name",
+            label = "Cohort table name",
+            choices = unique(cohortDetails$cohort_table_name),
+            selected = unique(cohortDetails$cohort_table_name),
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
+            multiple = TRUE
+          )
+        ),
+        div(
+          style = "display: inline-block;vertical-align:top; width: 150px;",
+          pickerInput(
+            inputId = "cohort_count_count",
+            label = "Count type",
+            choices = c("Number records", "Number subjects"),
+            selected = "Number records",
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
+            multiple = FALSE
+          )
+        ),
+        div(
+          style = "display: inline-block;vertical-align:top; width: 150px;",
+          pickerInput(
+            inputId = "cohort_count_cdm_name",
+            label = "CDM name",
+            choices = unique(cohortDetails$cdm_name),
+            selected = unique(cohortDetails$cdm_name),
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
+            multiple = TRUE
+          )
+        ),
+        div(
+          style = "margin-bottom: 20px;",
+          downloadButton("cohort_count_download_table", "Download current counts")
+        ),
+        DTOutput("cohort_count_table") %>% withSpinner()
+      ),
+      ### cohort_attrition ----
+      tabItem(
+        tabName = "cohort_attrition",
+        h3("Cohort attrition"),
+        p("See the attrition for each cohort of the present study"),
+        div(
+          style = "display: inline-block;vertical-align:top; width: 150px;",
+          pickerInput(
+            inputId = "cohort_attrition_cdm_name",
+            label = "CDM name",
+            choices = unique(cohortDetails$cdm_name),
+            selected = unique(cohortDetails$cdm_name),
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
+            multiple = FALSE
+          )
+        ),
+        div(
+          style = "display: inline-block;vertical-align:top; width: 200px;",
+          pickerInput(
+            inputId = "cohort_attrition_cohort_name",
+            label = "Cohort table and cohort name",
+            choices = cohortDetails %>%
+              mutate(cohort_name = paste0(cohort_table_name, ": ", cohort_name)) %>%
+              select(cohort_name) %>% distinct() %>% pull(),
+            selected = cohortDetails %>%
+              head(1) %>%
+              mutate(cohort_name = paste0(cohort_table_name, ": ", cohort_name)) %>%
+              pull(cohort_name),
+            options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
+            multiple = FALSE
+          )
+        ),
+        div(
+          style = "margin-bottom: 20px;",
+          downloadButton("cohort_attrition_download_table", "Download current attrition")
+        ),
+        DTOutput("cohort_attrition_table") %>% withSpinner()
       ),
       ### incidence_estimates ----
       tabItem(
@@ -311,6 +419,73 @@ server <- function(input, output, session) {
       rownames = FALSE,
       extensions = "Buttons",
       options = list(scrollX = TRUE, scrollCollapse = TRUE)
+    )
+  })
+
+  ## cohort_count ----
+  ### get counts ----
+  getCohortCount <- reactive({
+    cohortDetails %>%
+      mutate(reason_id = as.numeric(reason_id)) %>%
+      filter(cdm_name %in% input$cohort_count_cdm_name) %>%
+      filter(cohort_table_name %in% input$cohort_count_cohort_table_name) %>%
+      group_by(cohort_name, cohort_table_name) %>%
+      filter(reason_id == max(reason_id)) %>%
+      ungroup() %>%
+      select(cohort_table_name, cohort_name, cdm_name, value = !!toSnakeCase(input$cohort_count_count)) %>%
+      mutate(value = suppressWarnings(as.numeric(value))) %>%
+      pivot_wider(names_from = cdm_name, values_from = value)
+  })
+  ### download table ----
+  output$cohort_count_download_table <- downloadHandler(
+    filename = function() {
+      "cohortCountTable.csv"
+    },
+    content = function(file) {
+      write_csv(getCohortCount(), file)
+    }
+  )
+  ### table count ----
+  output$cohort_count_table <- renderDataTable({
+    table <- getCohortCount()
+    validate(need(nrow(table) > 0, "No results for selected inputs"))
+    datatable(
+      table,
+      rownames = FALSE,
+      extensions = "Buttons",
+      options = list(scrollX = TRUE, scrollCollapse = TRUE)
+    )
+  })
+
+  ## cohort_attrition ----
+  ### get attrition ----
+  getCohortAttrition <- reactive({
+    cohortDetails %>%
+      mutate(cohort_name = paste0(cohort_table_name, ": ", cohort_name)) %>%
+      filter(cohort_name == input$cohort_attrition_cohort_name) %>%
+      filter(cdm_name == input$cohort_attrition_cdm_name) %>%
+      mutate(reason_id = as.numeric(reason_id)) %>%
+      arrange(reason_id) %>%
+      select(reason_id, reason, number_records, number_subjects, excluded_records, excluded_subjects)
+  })
+  ### download table ----
+  output$cohort_attrition_download_table <- downloadHandler(
+    filename = function() {
+      "cohortAttritionTable.csv"
+    },
+    content = function(file) {
+      write_csv(getCohortAttrition(), file)
+    }
+  )
+  ### table count ----
+  output$cohort_attrition_table <- renderDataTable({
+    table <- getCohortAttrition()
+    validate(need(nrow(table) > 0, "No results for selected inputs"))
+    datatable(
+      table,
+      rownames = FALSE,
+      extensions = "Buttons",
+      options = list(scrollX = TRUE, scrollCollapse = TRUE, ordering = F)
     )
   })
 
