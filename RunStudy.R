@@ -66,13 +66,13 @@ info(logger, "COMPUTE INCIDENCE")
 inc <- estimateIncidence(
   cdm = cdm,
   denominatorTable = "denominator",
-  outcomeTable = "outcome_cohort",
+  outcomeTable = "outcome_asthma",
   interval = "overall",
   minCellCount = minCellCount
 ) %>%
   mutate(result_type = "Incidence estimates")
 write_csv(
-  x = inc, file = here(resultsFolder, paste0(cdmName(cdm), "_incidence.csv"))
+  x = inc, file = here(resultsFolder, paste0(cdmName(cdm), "_incidence_asthma.csv"))
 )
 info(logger, "INCIDENCE SAVED")
 
@@ -96,7 +96,7 @@ info(logger, "COMPUTE INCIDENCE")
 inc <- estimateIncidence(
   cdm = cdm,
   denominatorTable = "denominator_target",
-  outcomeTable = "outcome_cohort",
+  outcomeTable = "outcome_target",
   interval = "overall",
   minCellCount = minCellCount
 ) %>%
@@ -118,22 +118,12 @@ exportCohort <- function(cohort, tblName = attr(cohort, "tbl_name")) {
     )
   return(x)
 }
-# write_csv(
-#   x = exportCohort(cdm$target_cohort),
-#   file = here(resultsFolder, paste0(cdmName(cdm), "_counts_target.csv"))
-# )
-write_csv(
-  x = exportCohort(cdm$outcome_cohort),
-  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_outcome.csv"))
-)
-write_csv(
-  x = exportCohort(cdm$denominator, "denominator"),
-  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_denominator.csv"))
-)
-write_csv(
-  x = exportCohort(cdm$denominator_target, "denominator_target"),
-  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_denominator_target.csv"))
-)
+for (nm in c("target_cohort", "outcome_target", "outcome_asthma", "denominator", "denominator_target")) {
+  write_csv(
+    x = exportCohort(cdm[[nm]], nm),
+    file = here(resultsFolder, paste0(cdmName(cdm), "_counts_", nm, ".csv"))
+  )
+}
 
 # create zip file ----
 info(logger, "EXPORT RESULTS")

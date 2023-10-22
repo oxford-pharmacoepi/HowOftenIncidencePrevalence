@@ -1,0 +1,4 @@
+cohort_definition_id,cohort_name,number_records,number_subjects,reason_id,reason,excluded_records,excluded_subjects,cdm_name,result_type,cohort_table_name
+1,Concomitant_TNF_1,0,0,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,outcome_target
+2,Concomitant_TNF_2,0,0,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,outcome_target
+3,Concomitant_TNF_3,0,0,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,outcome_target

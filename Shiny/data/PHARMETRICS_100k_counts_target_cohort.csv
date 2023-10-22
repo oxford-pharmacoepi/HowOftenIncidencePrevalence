@@ -1,0 +1,7 @@
+cohort_definition_id,cohort_name,number_records,number_subjects,reason_id,reason,excluded_records,excluded_subjects,cdm_name,result_type,cohort_table_name
+1,IBD,539,539,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
+2,IBD_365,539,539,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
+3,Plaque_psoriasis,894,894,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
+4,Plaque_psoriasis_365,894,894,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
+5,Psoriatic_arthritis,209,209,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
+6,Psoriatic_arthritis_365,209,209,1,Qualifying initial records,0,0,PHARMETRICS_100k,Cohort details,target_cohort
