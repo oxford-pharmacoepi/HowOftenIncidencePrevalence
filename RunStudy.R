@@ -61,7 +61,7 @@ inc <- estimateIncidence(
   interval = "overall",
   minCellCount = minCellCount
 ) %>%
-  muatte(result_type = "Incidence estimates")
+  mutate(result_type = "Incidence estimates")
 write_csv(
   x = inc, file = here(resultsFolder, paste0(cdmName(cdm), "_incidence.csv"))
 )
