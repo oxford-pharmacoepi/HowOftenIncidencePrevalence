@@ -33,7 +33,9 @@ for (file in files) {
   }
 }
 cdmSnapshot <- cdmSnapshot %>% mutate(result_type = "CDM snapshot")
-incidenceEstimates <- incidenceEstimates %>% mutate(result_type = "Incidence estimates")
+incidenceEstimates <- incidenceEstimates %>% 
+  mutate(result_type = "Incidence estimates") %>%
+  mutate(analysis_outcome_washout = 0)
 
 # ui shiny ----
 ui <- dashboardPage(
@@ -500,15 +502,15 @@ server <- function(input, output, session) {
       filter(denominator_target_cohort_name %in% input$incidence_estimates_denominator_target_cohort_name) %>%
       filter(denominator_age_group %in% input$incidence_estimates_denominator_age_group) %>%
       filter(denominator_sex %in% input$incidence_estimates_denominator_sex) %>%
-      filter(denominator_days_prior_observation %in% input$incidence_estimates_denominator_days_prior_observation) %>%
-      filter(denominator_start_date %in% input$incidence_estimates_denominator_start_date) %>%
-      filter(denominator_end_date %in% input$incidence_estimates_denominator_end_date) %>%
-      filter(analysis_outcome_washout %in% input$incidence_estimates_analysis_outcome_washout) %>%
-      filter(analysis_repeated_events %in% input$incidence_estimates_analysis_repeated_events) %>%
-      filter(analysis_complete_database_intervals %in% input$incidence_estimates_analysis_complete_database_intervals) %>%
-      filter(analysis_min_cell_count %in% input$incidence_estimates_analysis_min_cell_count) %>%
-      filter(analysis_interval %in% input$incidence_estimates_analysis_interval) %>%
-      filter(incidence_start_date %in% input$incidence_estimates_incidence_start_date) %>%
+      # filter(denominator_days_prior_observation %in% input$incidence_estimates_denominator_days_prior_observation) %>%
+      # filter(denominator_start_date %in% input$incidence_estimates_denominator_start_date) %>%
+      # filter(denominator_end_date %in% input$incidence_estimates_denominator_end_date) %>%
+      # filter(analysis_outcome_washout %in% input$incidence_estimates_analysis_outcome_washout) %>%
+      # filter(analysis_repeated_events %in% input$incidence_estimates_analysis_repeated_events) %>%
+      # filter(analysis_complete_database_intervals %in% input$incidence_estimates_analysis_complete_database_intervals) %>%
+      # filter(analysis_min_cell_count %in% input$incidence_estimates_analysis_min_cell_count) %>%
+      # filter(analysis_interval %in% input$incidence_estimates_analysis_interval) %>%
+      # filter(incidence_start_date %in% input$incidence_estimates_incidence_start_date) %>%
       mutate(
         person_years = round(suppressWarnings(as.numeric(person_years))),
         person_days = round(suppressWarnings(as.numeric(person_days))),
