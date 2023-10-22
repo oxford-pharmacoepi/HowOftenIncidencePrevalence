@@ -19,17 +19,17 @@ info(logger, "INSTANTIATE TARGET COHORT")
 targetCohorts <- readCohortSet(here("Cohorts", "Target"))
 cdm <- generateCohortSet(
   cdm = cdm,
-  cohortSet = cohorts,
+  cohortSet = targetCohorts,
   name = "target_cohort",
   overwrite = TRUE
 )
 info(logger, "TARGET COHORT CREATED")
 
 info(logger, "INSTANTIATE OUTCOME COHORT")
-targetCohorts <- readCohortSet(here("Cohorts", "Outcome"))
+outcomeCohorts <- readCohortSet(here("Cohorts", "Outcome"))
 cdm <- generateCohortSet(
   cdm = cdm,
-  cohortSet = cohorts,
+  cohortSet = outcomeCohorts,
   name = "outcome_cohort",
   overwrite = TRUE
 )
