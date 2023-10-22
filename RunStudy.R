@@ -64,6 +64,29 @@ write_csv(
 )
 info(logger, "INCIDENCE SAVED")
 
+# export cohort counts ----
+exportCohort <- function(cohort) {
+  cohortSet(cohort) %>%
+    inner_join(cohortAttrition(cohort)) %>%
+    mutate(
+      cdm_name = cdmName(attr(cohort, "cdm_reference")),
+      result_type = "Cohort details",
+      cohort_table_name = attr(cohort, "tbl_name")
+    )
+}
+write_csv(
+  x = exportCohort(cdm$target_cohort),
+  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_target.csv"))
+)
+write_csv(
+  x = exportCohort(cdm$outcome_cohort),
+  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_outcome.csv"))
+)
+write_csv(
+  x = exportCohort(cdm$denominator),
+  file = here(resultsFolder, paste0(cdmName(cdm), "_counts_denominator.csv"))
+)
+
 # create zip file ----
 info(logger, "EXPORT RESULTS")
 zip(
