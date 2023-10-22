@@ -208,10 +208,10 @@ ui <- dashboardPage(
         div(
           style = "display: inline-block;vertical-align:top; width: 150px;",
           pickerInput(
-            inputId = "incidence_estimates_denominator_strata_cohort_name",
+            inputId = "incidence_estimates_denominator_target_cohort_name",
             label = "Strata",
-            choices = unique(incidenceEstimates$denominator_strata_cohort_name),
-            selected = unique(incidenceEstimates$denominator_strata_cohort_name),
+            choices = unique(incidenceEstimates$denominator_target_cohort_name),
+            selected = unique(incidenceEstimates$denominator_target_cohort_name),
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
             multiple = TRUE
           )
@@ -241,10 +241,10 @@ ui <- dashboardPage(
         div(
           style = "display: inline-block;vertical-align:top; width: 150px;",
           pickerInput(
-            inputId = "incidence_estimates_denominator_days_prior_history",
+            inputId = "incidence_estimates_denominator_days_prior_observation",
             label = "Days prior observation",
-            choices = unique(incidenceEstimates$denominator_days_prior_history),
-            selected = unique(incidenceEstimates$denominator_days_prior_history),
+            choices = unique(incidenceEstimates$denominator_days_prior_observation),
+            selected = unique(incidenceEstimates$denominator_days_prior_observation),
             options = list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
             multiple = TRUE
           )
@@ -354,7 +354,7 @@ ui <- dashboardPage(
               pickerInput(
                 inputId = "incidence_estimates_plot_x",
                 label = "x axis",
-                choices = c("cdm_name", "outcome_cohort_name", "denominator_strata_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_history", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
+                choices = c("cdm_name", "outcome_cohort_name", "denominator_target_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_observation", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
                 selected = "incidence_start_date",
                 list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
                 multiple = FALSE
@@ -365,7 +365,7 @@ ui <- dashboardPage(
               pickerInput(
                 inputId = "incidence_estimates_plot_facet",
                 label = "Facet by",
-                choices = c("cdm_name", "outcome_cohort_name", "denominator_strata_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_history", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
+                choices = c("cdm_name", "outcome_cohort_name", "denominator_target_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_observation", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
                 selected = c("outcome_cohort_name", "cdm_name"),
                 list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
                 multiple = TRUE
@@ -376,7 +376,7 @@ ui <- dashboardPage(
               pickerInput(
                 inputId = "incidence_estimates_plot_colour",
                 label = "Colour by",
-                choices = c("cdm_name", "outcome_cohort_name", "denominator_strata_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_history", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
+                choices = c("cdm_name", "outcome_cohort_name", "denominator_target_cohort_name", "denominator_age_group", "denominator_sex", "denominator_days_prior_observation", "denominator_start_date", "denominator_end_date", "analysis_outcome_washout", "analysis_repeated_events", "analysis_complete_database_intervals", "analysis_min_cell_count", "analysis_interval", "incidence_start_date"),
                 list(`actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"),
                 multiple = TRUE
               )
@@ -497,10 +497,10 @@ server <- function(input, output, session) {
     incidenceEstimates %>%
       filter(cdm_name %in% input$incidence_estimates_cdm_name) %>%
       filter(outcome_cohort_name %in% input$incidence_estimates_outcome_cohort_name) %>%
-      filter(denominator_strata_cohort_name %in% input$incidence_estimates_denominator_strata_cohort_name) %>%
+      filter(denominator_target_cohort_name %in% input$incidence_estimates_denominator_target_cohort_name) %>%
       filter(denominator_age_group %in% input$incidence_estimates_denominator_age_group) %>%
       filter(denominator_sex %in% input$incidence_estimates_denominator_sex) %>%
-      filter(denominator_days_prior_history %in% input$incidence_estimates_denominator_days_prior_history) %>%
+      filter(denominator_days_prior_observation %in% input$incidence_estimates_denominator_days_prior_observation) %>%
       filter(denominator_start_date %in% input$incidence_estimates_denominator_start_date) %>%
       filter(denominator_end_date %in% input$incidence_estimates_denominator_end_date) %>%
       filter(analysis_outcome_washout %in% input$incidence_estimates_analysis_outcome_washout) %>%
@@ -536,7 +536,7 @@ server <- function(input, output, session) {
         incidence_100000_pys, " (", incidence_100000_pys_95CI_lower, " to ",
         incidence_100000_pys_95CI_upper, " )"
       )) %>%
-      select(cdm_name, outcome_cohort_name, denominator_strata_cohort_name, denominator_age_group, denominator_sex, denominator_days_prior_history, denominator_start_date, denominator_end_date, analysis_outcome_washout, analysis_repeated_events, analysis_complete_database_intervals, analysis_min_cell_count, analysis_interval, incidence_start_date, n_events, n_persons, person_years, incidence_100000_pys)
+      select(cdm_name, outcome_cohort_name, denominator_target_cohort_name, denominator_age_group, denominator_sex, denominator_days_prior_observation, denominator_start_date, denominator_end_date, analysis_outcome_washout, analysis_repeated_events, analysis_complete_database_intervals, analysis_min_cell_count, analysis_interval, incidence_start_date, n_events, n_persons, person_years, incidence_100000_pys)
     datatable(
       table,
       rownames = FALSE,
